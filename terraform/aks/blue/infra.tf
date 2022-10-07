@@ -3,7 +3,7 @@ resource "azurerm_kubernetes_cluster" "blue_cluster" {
   resource_group_name = data.terraform_remote_state.base_infra.outputs.aks_rg.name
   location            = data.terraform_remote_state.base_infra.outputs.aks_rg.location
   dns_prefix          = "${local.name_prefix}-blue"
-  kubernetes_version             = var.k8s_version
+  kubernetes_version  = var.k8s_version
 
   default_node_pool {
     name           = "default"

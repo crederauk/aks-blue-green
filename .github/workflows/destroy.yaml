@@ -2,12 +2,76 @@ name: "Destroy"
 on:
   workflow_dispatch:
     inputs:
-        user:
-          description: 'The name of the person triggering the pipeline'     
-          required: true
+      user:
+        description: 'The name of the person triggering the pipeline'     
+        required: true
+      current_active_cluster:
+        type: choice
+        description: 'The cluster that is currently active'
+        options: 
+        - blue
+        - green
+      deploy_blue: 
+        type: choice
+        description: 'Should the blue cluster be deployed?'
+        options: 
+        - true
+        - false
+      deploy_green: 
+        type: choice
+        description: 'Should the green cluster be deployed?'
+        options: 
+        - true
+        - false
 
 jobs:
+  deploy_agw:
+    runs-on: ubuntu-latest
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_NONPROD_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_NONPROD_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_NONPROD_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      TF_VAR_subscription_id: ${{ secrets.AZURE_NONPROD_SUBSCRIPTION_ID }}
+      TF_VAR_maintainer: ${{ github.event.inputs.user }}
+      TF_VAR_current_active_cluster: ${{ github.event.inputs.current_active_cluster }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: "Setup Terraform"
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.3.2
+
+      - name: "Terraform format"
+        id: fmt_agw
+        working-directory: terraform/agw
+        run: terraform fmt --recursive
+        continue-on-error: false
+
+      - name: "Terraform Init"
+        id: init_agw
+        working-directory: terraform/agw
+        run: terraform init
+
+      - name: "Terraform Validate"
+        id: validate_agw
+        working-directory: terraform/agw
+        run: terraform validate -no-color
+
+      - name: "Terraform Plan"
+        id: plan_agw
+        working-directory: terraform/agw
+        run: terraform plan -destroy
+
+      - name: "Terraform Apply"
+        id: apply_agw
+        working-directory: terraform/agw
+        run: terraform destroy -auto-approve
+
   destroy_aks_blue:
+    needs: deploy_agw
     runs-on: ubuntu-latest
     env:
       ARM_CLIENT_ID: ${{ secrets.AZURE_NONPROD_CLIENT_ID }}

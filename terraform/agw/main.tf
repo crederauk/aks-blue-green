@@ -20,7 +20,7 @@ resource "azurerm_application_gateway" "network" {
 
   gateway_ip_configuration {
     name      = "${local.name_prefix}-agw-ip-config"
-    subnet_id = data.terraform_remote_state.base_infra.outputs.sn.agw.id
+    subnet_id = data.terraform_remote_state.base_infra.outputs.sn.agw_sn_id.id
   }
 
   frontend_port {
@@ -34,7 +34,8 @@ resource "azurerm_application_gateway" "network" {
   }
 
   backend_address_pool {
-    name = local.backend_address_pool_name
+    name         = local.backend_address_pool_name
+    ip_addresses = local.backend_address_pool_ips
   }
 
   backend_http_settings {
@@ -63,3 +64,4 @@ resource "azurerm_application_gateway" "network" {
 
   tags = local.common_tags
 }
+

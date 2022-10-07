@@ -20,7 +20,7 @@ variable "k8s_version" {
 }
 
 variable "nginx_chart_version" {
-  type = string
-  default = "4.3.0"
+  type        = string
+  default     = "4.3.0"
   description = "The version of the Nginx Helm chart to use to deploy the ingress controller"
 }
