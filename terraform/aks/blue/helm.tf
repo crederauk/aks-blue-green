@@ -1,8 +1,9 @@
 resource "helm_release" "nginx_ingress" {
-  name       = "internal-nginx-ingress-controller"
-  namespace  = "ingress"
-  repository = "https://kubernetes.github.io/ingress-nginx"
-  chart      = "ingress-nginx"
+  name             = "internal-ingress"
+  namespace        = "ingress"
+  repository       = "https://kubernetes.github.io/ingress-nginx"
+  chart            = "ingress-nginx"
+  create_namespace = true
   values = [
     templatefile(
       "${path.module}/values.yaml.tpl",

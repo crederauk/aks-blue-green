@@ -9,7 +9,7 @@ variable "address_space" {
 }
 
 variable "maintainer" {
-  type = string
+  type        = string
   description = "Name of the user deploying the terraform"
 }
 
