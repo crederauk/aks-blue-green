@@ -3,6 +3,7 @@ resource "azurerm_kubernetes_cluster" "blue_cluster" {
   resource_group_name = data.terraform_remote_state.base_infra.outputs.aks_rg.name
   location            = data.terraform_remote_state.base_infra.outputs.aks_rg.location
   dns_prefix          = "${local.name_prefix}-blue"
+  kubernetes_version             = var.k8s_version
 
   default_node_pool {
     name           = "default"
@@ -18,11 +19,15 @@ resource "azurerm_kubernetes_cluster" "blue_cluster" {
     network_plugin     = "kubenet"
   }
 
-  # azure_active_directory_role_based_access_control {
-  #   managed = true
-  #   admin_group_object_ids = ["d9ff49a5-bb4d-4893-944d-fabc7d05f4a0"]
-  #   azure_rbac_enabled = true
+  # oms_agent {
+  #   log_analytics_workspace_id = # ID of log analytics to write to 
   # }
+
+  role_based_access_control_enabled = true
+  azure_active_directory_role_based_access_control {
+    managed                = true
+    admin_group_object_ids = ["d9ff49a5-bb4d-4893-944d-fabc7d05f4a0"]
+  }
 
   identity {
     type = "SystemAssigned"

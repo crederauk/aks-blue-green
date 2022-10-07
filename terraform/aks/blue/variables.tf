@@ -12,3 +12,15 @@ variable "maintainer" {
 variable "subscription_id" {
   type = string
 }
+
+variable "k8s_version" {
+  type        = string
+  default     = "1.24.6"
+  description = "the version of kubernetes to use"
+}
+
+variable "nginx_chart_version" {
+  type = string
+  default = "4.3.0"
+  description = "The version of the Nginx Helm chart to use to deploy the ingress controller"
+}

@@ -1,3 +1,3 @@
 output "internal_ip" {
-  value = ""
+  value = local.ingress_ip
 }

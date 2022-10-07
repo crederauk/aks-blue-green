@@ -5,12 +5,15 @@ resource "helm_release" "nginx_ingress" {
   repository       = "https://kubernetes.github.io/ingress-nginx"
   chart            = "ingress-nginx"
   create_namespace = true
+  version          = var.nginx_chart_version
+  timeout          = 900
+
   values = [
     templatefile(
       "${path.module}/values.yaml.tpl",
       {
         ingress_replicas = var.ingress_replicas
-        ingress_ip       = cidrhost(data.terraform_remote_state.base_infra.outputs.sn.blue.cidr, 200)
+        ingress_ip       = local.ingress_ip
       }
     )
   ]
