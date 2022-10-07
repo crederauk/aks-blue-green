@@ -30,3 +30,15 @@ resource "azurerm_kubernetes_cluster" "blue_cluster" {
 
   tags = local.common_tags
 }
+
+resource "azurerm_role_assignment" "aks_to_sn_role" {
+  scope                = data.terraform_remote_state.base_infra.outputs.sn.blue.id
+  role_definition_name = "Network Contributor"
+  principal_id         = azurerm_kubernetes_cluster.blue_cluster.kubelet_identity[0].object_id
+}
+
+resource "azurerm_role_assignment" "aks_to_vnet_role" {
+  scope                = join("/", slice(split("/", data.terraform_remote_state.base_infra.outputs.sn.blue.id), 0, 9))
+  role_definition_name = "Reader"
+  principal_id         = azurerm_kubernetes_cluster.blue_cluster.kubelet_identity[0].object_id
+}
