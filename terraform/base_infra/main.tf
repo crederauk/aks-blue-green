@@ -1,24 +1,32 @@
 resource "azurerm_resource_group" "aks_rg" {
   name     = "${local.name_prefix}-rg"
   location = var.location
+
+  tags = local.common_tags
 }
 
 resource "azurerm_network_security_group" "aks_blue_snet_sg" {
   name                = "${local.name_prefix}-blue-sg"
   location            = azurerm_resource_group.aks_rg.location
   resource_group_name = azurerm_resource_group.aks_rg.name
+
+  tags = local.common_tags
 }
 
 resource "azurerm_network_security_group" "aks_green_snet_sg" {
   name                = "${local.name_prefix}-green-sg"
   location            = azurerm_resource_group.aks_rg.location
   resource_group_name = azurerm_resource_group.aks_rg.name
+
+  tags = local.common_tags
 }
 
 resource "azurerm_network_security_group" "aks_agw_snet_sg" {
   name                = "${local.name_prefix}-agw-sg"
   location            = azurerm_resource_group.aks_rg.location
   resource_group_name = azurerm_resource_group.aks_rg.name
+
+  tags = local.common_tags
 }
 
 resource "azurerm_virtual_network" "aks_vnet" {

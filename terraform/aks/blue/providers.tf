@@ -10,18 +10,32 @@ terraform {
       version = "2.7.0"
     }
   }
+
+  backend "azurerm" {
+    resource_group_name  = "rg-tf-st"
+    storage_account_name = "sttfstatealz"
+    container_name       = "aks-state"
+    key                  = "aks_blue_green_aks.tfstate"
+  }
 }
 
 provider "azurerm" {
+  subscription_id = var.subscription_id
   features {}
   skip_provider_registration = true
 }
 
 provider "helm" {
   kubernetes {
-    host                   = azurerm_kubernetes_cluster.blue_cluster.kube_admin_config.0.host
-    client_certificate     = base64decode(azurerm_kubernetes_cluster.blue_cluster.kube_admin_config.0.client_certificate)
-    client_key             = base64decode(azurerm_kubernetes_cluster.blue_cluster.kube_admin_config.0.client_key)
-    cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.blue_cluster.kube_admin_config.0.cluster_ca_certificate)
+    username               = azurerm_kubernetes_cluster.blue_cluster.kube_config.0.username
+    password               = azurerm_kubernetes_cluster.blue_cluster.kube_config.0.password
+    host                   = azurerm_kubernetes_cluster.blue_cluster.kube_config.0.host
+    client_certificate     = base64decode(azurerm_kubernetes_cluster.blue_cluster.kube_config.0.client_certificate)
+    client_key             = base64decode(azurerm_kubernetes_cluster.blue_cluster.kube_config.0.client_key)
+    cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.blue_cluster.kube_config.0.cluster_ca_certificate)
+    # host                   = azurerm_kubernetes_cluster.blue_cluster.kube_admin_config.0.host
+    # client_certificate     = base64decode(azurerm_kubernetes_cluster.blue_cluster.kube_admin_config.0.client_certificate)
+    # client_key             = base64decode(azurerm_kubernetes_cluster.blue_cluster.kube_admin_config.0.client_key)
+    # cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.blue_cluster.kube_admin_config.0.cluster_ca_certificate)
   }
 }

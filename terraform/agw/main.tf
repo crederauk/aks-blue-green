@@ -3,6 +3,8 @@ resource "azurerm_public_ip" "aks_agw_ip" {
   resource_group_name = data.terraform_remote_state.base_infra.outputs.aks_rg.name
   location            = data.terraform_remote_state.base_infra.outputs.aks_rg.location
   allocation_method   = "Dynamic"
+
+  tags = local.common_tags
 }
 
 resource "azurerm_application_gateway" "network" {
@@ -18,7 +20,7 @@ resource "azurerm_application_gateway" "network" {
 
   gateway_ip_configuration {
     name      = "${local.name_prefix}-agw-ip-config"
-    subnet_id = data.terraform_remote_state.base_infra.outputs.sn_ids.agw_sn_id
+    subnet_id = data.terraform_remote_state.base_infra.outputs.sn.agw.id
   }
 
   frontend_port {
@@ -58,4 +60,6 @@ resource "azurerm_application_gateway" "network" {
     backend_address_pool_name  = local.backend_address_pool_name
     backend_http_settings_name = local.http_setting_name
   }
+
+  tags = local.common_tags
 }

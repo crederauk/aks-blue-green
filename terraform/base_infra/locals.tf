@@ -6,5 +6,7 @@ locals {
   common_tags = {
     deployed_by = "Terraform"
     repo        = "aks_blue_green"
+    name        = var.maintainer
+    environment = "Dev"
   }
 }
