@@ -52,6 +52,7 @@ jobs:
         run: terraform apply -auto-approve
 
   deploy_aks_blue:
+    needs: deploy_base_infra
     runs-on: ubuntu-latest
     env:
       ARM_CLIENT_ID: ${{ secrets.AZURE_NONPROD_CLIENT_ID }}
