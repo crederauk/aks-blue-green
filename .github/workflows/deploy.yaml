@@ -6,17 +6,16 @@ on:
           description: 'The name of the person triggering the pipeline'     
           required: true
 
-env:
-  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-  ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-  ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-  TF_VAR_subscription_id: ${{ secrets.TF_VAR_AZURE_DEV_SUBSCRIPTION_UUID }}
-  TF_VAR_maintainer: ${{ github.event.inputs.user }}
-
 jobs:
   deploy_base_infra:
     runs-on: ubuntu-latest
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_NONPROD_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_NONPROD_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_NONPROD_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      TF_VAR_subscription_id: ${{ secrets.AZURE_NONPROD_SUBSCRIPTION_ID }}
+      TF_VAR_maintainer: ${{ github.event.inputs.user }}
 
     steps:
       - uses: actions/checkout@v3
@@ -54,6 +53,13 @@ jobs:
 
   deploy_aks_blue:
     runs-on: ubuntu-latest
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_NONPROD_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_NONPROD_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_NONPROD_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      TF_VAR_subscription_id: ${{ secrets.AZURE_NONPROD_SUBSCRIPTION_ID }}
+      TF_VAR_maintainer: ${{ github.event.inputs.user }}
 
     steps:
       - uses: actions/checkout@v3
