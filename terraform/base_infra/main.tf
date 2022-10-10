@@ -26,6 +26,30 @@ resource "azurerm_network_security_group" "aks_agw_snet_sg" {
   location            = azurerm_resource_group.aks_rg.location
   resource_group_name = azurerm_resource_group.aks_rg.name
 
+  security_rule {
+    name                       = "AllowHttpInternetToAgw"
+    priority                   = 3000
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "80"
+    source_address_prefix      = "Internet"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "AllowGwManagerAccess"
+    priority                   = 3100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "65200-65535"
+    source_address_prefix      = "GatewayManager"
+    destination_address_prefix = "*"
+  }
+
   tags = local.common_tags
 }
 

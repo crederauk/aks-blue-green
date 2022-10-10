@@ -30,12 +30,14 @@ resource "azurerm_application_gateway" "network" {
   }
 
   backend_http_settings {
-    name                  = local.http_setting_name
-    cookie_based_affinity = "Disabled"
-    path                  = "/"
-    port                  = 80
-    protocol              = "Http"
-    request_timeout       = 60
+    name                                = local.http_setting_name
+    cookie_based_affinity               = "Disabled"
+    path                                = "/"
+    port                                = 80
+    protocol                            = "Http"
+    request_timeout                     = 60
+    pick_host_name_from_backend_address = true
+    probe_name                          = "${var.current_active_cluster}-probe"
   }
 
   http_listener {
@@ -51,6 +53,16 @@ resource "azurerm_application_gateway" "network" {
     http_listener_name         = local.listener_name
     backend_address_pool_name  = local.backend_address_pool_name
     backend_http_settings_name = local.http_setting_name
+  }
+
+  probe {
+    name                                      = "${var.current_active_cluster}-probe"
+    pick_host_name_from_backend_http_settings = true
+    path                                      = "/healthz"
+    protocol                                  = "Http"
+    interval                                  = 30
+    timeout                                   = 30
+    unhealthy_threshold                       = 3
   }
 
   tags = local.common_tags
