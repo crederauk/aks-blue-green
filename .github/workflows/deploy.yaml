@@ -84,6 +84,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      # - name: "Build webserver"
+      #   id: build_blue_webserver
+      #   working-directory: terraform/aks/blue/aks-templates
+      #   run: docker build -t nginx-webserver --build-arg CLUSTER_COLOUR=Blue .
+
+      #TODO: push built container to repository
+
       - name: "Setup Terraform"
         uses: hashicorp/setup-terraform@v1
         with:

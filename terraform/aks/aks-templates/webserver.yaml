@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-deployment
+  template:
+    metadata:
+      labels:
+        app: nginx-deployment
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: nginx-deployment
+        image: nginx    # to be added when webserver is pushed to remote repo -webserver
+        ports:
+        - containerPort: 80
+          name: html
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-svc
+spec:
+  selector:
+    app.kubernetes.io/name: nginx-deployment
+  ports:
+    - name: webserver-html
+      protocol: TCP
+      port: 80
+      targetPort: html

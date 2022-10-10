@@ -1,6 +1,7 @@
 locals {
-  name_prefix = "aks"
-  cluster     = "blue"
+  name_prefix   = "aks"
+  cluster       = "blue"
+  templates_dir = "${path.module}/../aks-templates"
   common_tags = {
     deployed_by = "Terraform"
     repo        = "aks_blue_green"

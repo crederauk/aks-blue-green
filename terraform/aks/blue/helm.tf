@@ -10,7 +10,7 @@ resource "helm_release" "nginx_ingress" {
 
   values = [
     templatefile(
-      "${path.module}/values.yaml.tpl",
+      "${local.templates_dir}/values.yaml.tpl",
       {
         ingress_replicas = var.ingress_replicas
         ingress_ip       = local.ingress_ip

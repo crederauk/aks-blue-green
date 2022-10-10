@@ -73,3 +73,12 @@ resource "azurerm_subnet_network_security_group_association" "agw_sn_sg_associat
   subnet_id                 = azurerm_subnet.agw_sn.id
   network_security_group_id = azurerm_network_security_group.aks_agw_snet_sg.id
 }
+
+resource "azurerm_public_ip" "aks_agw_ip" {
+  name                = "${local.name_prefix}-pip"
+  resource_group_name = azurerm_resource_group.aks_rg.name
+  location            = azurerm_resource_group.aks_rg.location
+  allocation_method   = "Dynamic"
+
+  tags = local.common_tags
+}

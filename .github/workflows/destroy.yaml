@@ -65,8 +65,8 @@ jobs:
         working-directory: terraform/agw
         run: terraform plan -destroy
 
-      - name: "Terraform Apply"
-        id: apply_agw
+      - name: "Terraform destroy"
+        id: destroy_agw
         working-directory: terraform/agw
         run: terraform destroy -auto-approve
 
