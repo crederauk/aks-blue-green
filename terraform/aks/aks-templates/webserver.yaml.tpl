@@ -12,14 +12,19 @@ spec:
       labels:
         app: nginx-deployment
     spec:
-      nodeSelector:
-        "kubernetes.io/os": linux
       containers:
       - name: nginx-deployment
         image: nginx    # to be added when webserver is pushed to remote repo -webserver
         ports:
         - containerPort: 80
           name: html
+        volumeMounts:
+        - name: html-file
+          mountPath: /usr/share/nginx/html/
+      volumes:
+      - name: html-file
+        configMap:
+          name: index
 --- 
 apiVersion: v1
 kind: Service
@@ -27,9 +32,17 @@ metadata:
   name: nginx-svc
 spec:
   selector:
-    app.kubernetes.io/name: nginx-deployment
+    app: nginx-deployment
   ports:
     - name: webserver-html
       protocol: TCP
       port: 80
       targetPort: html
+--- 
+apiVersion: v1
+data:
+  index.html: |
+    <h1>Welcome to The ${cluster_colour} Cluster</h1>
+kind: ConfigMap
+metadata:
+  name: index
