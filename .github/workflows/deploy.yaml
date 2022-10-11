@@ -70,7 +70,7 @@ jobs:
         run: terraform apply -auto-approve
 
   deploy_aks_blue:
-    if: github.event.inputs.current_active_cluster == 'green' # stops deployment of changes to active cluster
+    if: success() && github.event.inputs.current_active_cluster == 'green' # stops deployment of changes to active cluster
     needs: deploy_base_infra
     runs-on: ubuntu-latest
     env:
@@ -122,7 +122,7 @@ jobs:
           fi
 
   deploy_aks_green:
-    if: github.event.inputs.current_active_cluster == 'blue' 
+    if: success() && github.event.inputs.current_active_cluster == 'blue' 
     needs: deploy_base_infra
     runs-on: ubuntu-latest
     env:
@@ -190,6 +190,7 @@ jobs:
 
   deploy_agw:
     needs: check_aks_deploy_steps
+    if: success()
     runs-on: ubuntu-latest
     env:
       ARM_CLIENT_ID: ${{ secrets.AZURE_NONPROD_CLIENT_ID }}
