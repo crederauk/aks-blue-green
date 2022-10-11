@@ -173,24 +173,11 @@ jobs:
             terraform destroy -target azurerm_kubernetes_cluster.green_cluster
           fi
 
-  check_aks_deploy_steps: 
+  deploy_agw: 
     if: ${{ always() }}
     needs: 
       - deploy_aks_blue
       - deploy_aks_green
-    runs-on: ubuntu-latest
-    steps:
-      - name: check passed or skipped
-        run: |
-          if [[ "${{ needs.deploy_aks_blue.result }}" == "success" || "${{ needs.deploy_aks_blue.result }}" == "skipped" ]] && [[ "${{ needs.deploy_aks_green.result }}" == "success" || "${{ needs.deploy_aks_green.result }}" == "skipped" ]]; then
-            exit 0
-          else
-            exit 1
-          fi
-
-  deploy_agw:
-    needs: check_aks_deploy_steps
-    if: success()
     runs-on: ubuntu-latest
     env:
       ARM_CLIENT_ID: ${{ secrets.AZURE_NONPROD_CLIENT_ID }}
@@ -202,6 +189,14 @@ jobs:
       TF_VAR_current_active_cluster: ${{ github.event.inputs.current_active_cluster }}
 
     steps:
+      - name: "Check passed or skipped"
+        run: |
+          if [[ "${{ needs.deploy_aks_blue.result }}" == "success" || "${{ needs.deploy_aks_blue.result }}" == "skipped" ]] && [[ "${{ needs.deploy_aks_green.result }}" == "success" || "${{ needs.deploy_aks_green.result }}" == "skipped" ]]; then
+            exit 0
+          else
+            exit 1
+          fi
+
       - uses: actions/checkout@v3
 
       - name: "Setup Terraform"
