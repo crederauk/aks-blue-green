@@ -70,7 +70,7 @@ jobs:
         run: terraform apply -auto-approve
 
   deploy_aks_blue:
-    if: github.event.inputs.current_active_cluster != 'blue' # stops deployment of changes to active cluster
+    if: github.event.inputs.current_active_cluster == 'green' # stops deployment of changes to active cluster
     needs: deploy_base_infra
     runs-on: ubuntu-latest
     env:
@@ -122,17 +122,17 @@ jobs:
           fi
 
   deploy_aks_green:
-    if: github.event.inputs.current_active_cluster != 'green' 
+    if: github.event.inputs.current_active_cluster == 'blue' 
     needs: deploy_base_infra
     runs-on: ubuntu-latest
     env:
-      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_CLIENT_ID: ${{ secrets.AZURE_NONPROD_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_NONPROD_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_NONPROD_SUBSCRIPTION_ID }}
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      TF_VAR_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      TF_VAR_subscription_id: ${{ secrets.AZURE_NONPROD_SUBSCRIPTION_ID }}
       TF_VAR_maintainer: ${{ github.event.inputs.user }}
-    
+
     steps:
       - uses: actions/checkout@v3
 
@@ -173,10 +173,24 @@ jobs:
             terraform destroy -target azurerm_kubernetes_cluster.green_cluster
           fi
 
-  deploy_agw:
+  check_aks_deploy_steps: 
+    if: ${{ always() }}
     needs: 
       - deploy_aks_blue
       - deploy_aks_green
+    runs-on: ubuntu-latest
+    steps:
+      - name: check passed or skipped
+        run: |
+          if [[ "${{ needs.deploy_aks_blue.result }}" == "success" || "${{ needs.deploy_aks_blue.result }}" == "skipped" ]] && [[ "${{ needs.deploy_aks_green.result }}" == "success" || "${{ needs.deploy_aks_green.result }}" == "skipped" ]]; then
+            exit 0
+          else
+            exit 1
+          fi
+
+  deploy_agw:
+    if: github.event.inputs.current_active_cluster == 'green' 
+    needs: check_aks_deploy_steps
     runs-on: ubuntu-latest
     env:
       ARM_CLIENT_ID: ${{ secrets.AZURE_NONPROD_CLIENT_ID }}
