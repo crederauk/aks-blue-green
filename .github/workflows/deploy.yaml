@@ -70,7 +70,7 @@ jobs:
         run: terraform apply -auto-approve
 
   deploy_aks_blue:
-    if: ${{ github.event.inputs.current_active_cluster }} != 'blue' # stops deployment of changes to active cluster
+    if: github.event.inputs.current_active_cluster != 'blue' # stops deployment of changes to active cluster
     needs: deploy_base_infra
     runs-on: ubuntu-latest
     env:
@@ -83,13 +83,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
-      # - name: "Build webserver"
-      #   id: build_blue_webserver
-      #   working-directory: terraform/aks/blue/aks-templates
-      #   run: docker build -t nginx-webserver --build-arg CLUSTER_COLOUR=Blue .
-
-      #TODO: push built container to repository
 
       - name: "Setup Terraform"
         uses: hashicorp/setup-terraform@v1
@@ -128,8 +121,62 @@ jobs:
             terraform destroy -target azurerm_kubernetes_cluster.blue_cluster
           fi
 
+  deploy_aks_green:
+    if: github.event.inputs.current_active_cluster != 'green' 
+    needs: deploy_base_infra
+    runs-on: ubuntu-latest
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      TF_VAR_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      TF_VAR_maintainer: ${{ github.event.inputs.user }}
+    
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: "Setup Terraform"
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.3.2
+
+      - name: "Terraform format"
+        id: fmt_aks
+        working-directory: terraform/aks/green
+        run: terraform fmt --recursive
+        continue-on-error: false
+
+      - name: "Terraform Init"
+        id: init_aks
+        working-directory: terraform/aks/green
+        run: terraform init
+
+      - name: "Terraform Validate"
+        id: validate_aks
+        working-directory: terraform/aks/green
+        run: terraform validate -no-color
+
+      - name: "Terraform Plan"
+        id: plan_aks
+        working-directory: terraform/aks/green
+        run: terraform plan
+
+      - name: "Terraform Apply"
+        id: apply_aks
+        working-directory: terraform/aks/green
+        run: |
+          if [[ "${{ github.event.inputs.deploy_green }}" = true ]]; then
+            terraform apply -auto-approve
+          else
+            terraform destroy -target helm_release.nginx_ingress # add other resources deployed to AKS
+            terraform destroy -target azurerm_kubernetes_cluster.green_cluster
+          fi
+
   deploy_agw:
-    needs: deploy_aks_blue
+    needs: 
+      - deploy_aks_blue
+      - deploy_aks_green
     runs-on: ubuntu-latest
     env:
       ARM_CLIENT_ID: ${{ secrets.AZURE_NONPROD_CLIENT_ID }}
