@@ -189,7 +189,6 @@ jobs:
           fi
 
   deploy_agw:
-    if: github.event.inputs.current_active_cluster == 'green' 
     needs: check_aks_deploy_steps
     runs-on: ubuntu-latest
     env:
