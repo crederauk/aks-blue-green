@@ -24,20 +24,14 @@ resource "azurerm_application_gateway" "network" {
     public_ip_address_id = data.terraform_remote_state.base_infra.outputs.agw_pip_id
   }
 
-  backend_address_pool {
-    name         = local.backend_address_pool_name
-    ip_addresses = local.backend_address_pool_ips
-  }
-
-  backend_http_settings {
-    name                                = local.http_setting_name
-    cookie_based_affinity               = "Disabled"
-    path                                = "/"
-    port                                = 80
-    protocol                            = "Http"
-    request_timeout                     = 60
-    pick_host_name_from_backend_address = true
-    probe_name                          = "${var.current_active_cluster}-probe"
+  probe {
+    name                                      = "nginx-ingress-probe"
+    pick_host_name_from_backend_http_settings = true
+    path                                      = "/healthz"
+    protocol                                  = "Http"
+    interval                                  = 30
+    timeout                                   = 30
+    unhealthy_threshold                       = 3
   }
 
   http_listener {
@@ -51,18 +45,42 @@ resource "azurerm_application_gateway" "network" {
     name                       = local.request_routing_rule_name
     rule_type                  = "Basic"
     http_listener_name         = local.listener_name
-    backend_address_pool_name  = local.backend_address_pool_name
-    backend_http_settings_name = local.http_setting_name
+    backend_address_pool_name  = local.current_backend_address_pool
+    backend_http_settings_name = local.current_http_setting
   }
 
-  probe {
-    name                                      = "${var.current_active_cluster}-probe"
-    pick_host_name_from_backend_http_settings = true
-    path                                      = "/healthz"
-    protocol                                  = "Http"
-    interval                                  = 30
-    timeout                                   = 30
-    unhealthy_threshold                       = 3
+  ### Blue Cluster Backend ###
+  backend_address_pool {
+    name         = local.blue_backend_address_pool_name
+    ip_addresses = local.blue_backend_address_pool_ips
+  }
+
+  backend_http_settings {
+    name                                = local.blue_http_setting_name
+    cookie_based_affinity               = "Disabled"
+    path                                = "/"
+    port                                = 80
+    protocol                            = "Http"
+    request_timeout                     = 60
+    pick_host_name_from_backend_address = true
+    probe_name                          = "nginx-ingress-probe"
+  }
+
+  ### Green Cluster Backend ###
+  backend_address_pool {
+    name         = local.green_backend_address_pool_name
+    ip_addresses = local.green_backend_address_pool_ips
+  }
+
+  backend_http_settings {
+    name                                = local.green_http_setting_name
+    cookie_based_affinity               = "Disabled"
+    path                                = "/"
+    port                                = 80
+    protocol                            = "Http"
+    request_timeout                     = 60
+    pick_host_name_from_backend_address = true
+    probe_name                          = "nginx-ingress-probe"
   }
 
   tags = local.common_tags

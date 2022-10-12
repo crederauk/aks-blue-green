@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-deployment
+  template:
+    metadata:
+      labels:
+        app: nginx-deployment
+    spec:
+      containers:
+      - name: nginx-deployment
+        image: nginx    # to be added when webserver is pushed to remote repo -webserver
+        ports:
+        - containerPort: 80
+          name: html
+        volumeMounts:
+        - name: html-file
+          mountPath: /usr/share/nginx/html/
+      volumes:
+      - name: html-file
+        configMap:
+          name: index
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-svc
+spec:
+  selector:
+    app: nginx-deployment
+  ports:
+    - name: webserver-html
+      protocol: TCP
+      port: 80
+      targetPort: html
+--- 
+apiVersion: v1
+data:
+  index.html: |
+    <h1>Welcome to The Green Cluster</h1>
+kind: ConfigMap
+metadata:
+  name: index
