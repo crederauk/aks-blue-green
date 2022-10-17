@@ -11,8 +11,8 @@ locals {
   redirect_configuration_name     = "${local.name_prefix}-rdrcfg"
   route_to_blue_backend_pool      = var.current_active_cluster == "blue" ? true : false
   route_to_green_backend_pool     = var.current_active_cluster == "green" ? true : false
-  blue_backend_address_pool_ips   = [lookup(data.terraform_remote_state.aks_blue.outputs, "internal_ip", null)]
-  green_backend_address_pool_ips  = [lookup(data.terraform_remote_state.aks_green.outputs, "internal_ip", null)]
+  blue_backend_address_pool_ips   = lookup(data.terraform_remote_state.aks_blue.outputs, "internal_ip", "not_found")
+  green_backend_address_pool_ips  = lookup(data.terraform_remote_state.aks_green.outputs, "internal_ip", "not_found")
   current_backend_address_pool    = var.current_active_cluster == "blue" ? local.blue_backend_address_pool_name : local.green_backend_address_pool_name
   current_http_setting            = var.current_active_cluster == "blue" ? local.blue_http_setting_name : local.green_http_setting_name
   common_tags = {

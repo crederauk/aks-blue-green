@@ -52,7 +52,7 @@ resource "azurerm_application_gateway" "network" {
   ### Blue Cluster Backend ###
   backend_address_pool {
     name         = local.blue_backend_address_pool_name
-    ip_addresses = local.blue_backend_address_pool_ips
+    ip_addresses = local.blue_backend_address_pool_ips == "not_found" ? [] : [local.blue_backend_address_pool_ips]
   }
 
   backend_http_settings {
@@ -69,7 +69,7 @@ resource "azurerm_application_gateway" "network" {
   ### Green Cluster Backend ###
   backend_address_pool {
     name         = local.green_backend_address_pool_name
-    ip_addresses = local.green_backend_address_pool_ips
+    ip_addresses = local.green_backend_address_pool_ips == "not_found" ? [] : [local.green_backend_address_pool_ips]
   }
 
   backend_http_settings {
