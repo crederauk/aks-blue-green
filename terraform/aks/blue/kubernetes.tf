@@ -34,7 +34,7 @@ resource "kubernetes_deployment" "nginx" {
           }
         }
         volume {
-          name       = "html-file"
+          name = "html-file"
           config_map {
             name = "index"
           }
