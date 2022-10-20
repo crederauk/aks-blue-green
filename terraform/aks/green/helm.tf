@@ -1,5 +1,5 @@
 resource "helm_release" "nginx_ingress" {
-  # depends_on       = [azurerm_role_assignment.aks_to_sn_role, azurerm_role_assignment.aks_to_vnet_role]
+  depends_on       = [azurerm_role_assignment.aks_to_sn_role, azurerm_role_assignment.aks_to_vnet_role]
   name             = "internal-ingress"
   namespace        = "ingress"
   repository       = "https://kubernetes.github.io/ingress-nginx"
